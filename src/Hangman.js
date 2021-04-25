@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { randomWord } from "./words";
 import "./Hangman.css";
 import img0 from "./0.jpg";
 import img1 from "./1.jpg";
@@ -17,8 +18,17 @@ class Hangman extends Component {
 
 	constructor(props) {
 		super(props);
-		this.state = { nWrong: 0, guessed: new Set(), answer: "apple" };
+		this.state = { nWrong: 0, guessed: new Set(), answer: randomWord() };
 		this.handleGuess = this.handleGuess.bind(this);
+		this.reset = this.reset.bind(this);
+	}
+
+	reset() {
+		this.setState({
+			nWrong: 0,
+			guessed: new Set(),
+			answer: randomWord(),
+		});
 	}
 
 	/** guessedWord: show current-state of word:
@@ -58,19 +68,25 @@ class Hangman extends Component {
 
 	/** render: render game */
 	render() {
-		let gameOver = this.state.nWrong >= this.props.maxWrong;
-		const lostMsg = <h2>You loose :)</h2>;
+		const gameOver = this.state.nWrong >= this.props.maxWrong;
+		const altText = `${this.state.nWrong}/${this.props.maxWrong}`;
+		const isWinner = this.guessedWord().join("") === this.state.answer;
+		let gameState = this.generateButtons();
+		if (isWinner) gameState = "You Win";
+		if (gameOver) gameState = "You Lose";
+
 		return (
 			<div className="Hangman">
 				<h1>Hangman</h1>
-				<img src={this.props.images[this.state.nWrong]} />
+				<img src={this.props.images[this.state.nWrong]} alt={altText} />
 				<h2>Number of wrong guess: {this.state.nWrong}</h2>
 				<p className="Hangman-word">
 					{!gameOver ? this.guessedWord() : this.state.answer}
 				</p>
-				<p className="Hangman-btns">
-					{!gameOver ? this.generateButtons() : lostMsg}
-				</p>
+				<p className="Hangman-btns">{gameState}</p>
+				<button id="reset" onClick={this.reset}>
+					Restart?
+				</button>
 			</div>
 		);
 	}
